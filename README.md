@@ -13,7 +13,12 @@ In this project, Images containing Dogs from different breeds are provided. Base
 
 ## File Description
 - dog_app.ipynb - notebook contains complete python code starting from library imports to Exploratory Data Analysis, Preparing the Image Data to pass through the models, fitting and evaluating the performance of various models.
-- dog_app.zip - contains the image data folder which contains images of Dog breeds to be classified
+- saved_model - folder containing the weights of the best performing models trained in the dog_app.ipynb notebook
+- images - provided by Udacity, contains images of dogs and people to be used for the classifier with additional images 
+- requirements - provided by Udacity, used to install all packages for the notebook
+- haarcascades - provided by Udacity, contains .xml file for the OpenCV face detector in the notebook
+- dog_app.html - html version of the dog_app notebook that is good to get a view of the logic
+- dog_app.zip - compressed file containing this project
 
 ## Libraries Used
 The following libraries are used:
@@ -24,14 +29,14 @@ The following libraries are used:
 - OpenCV
 
 ## Detect Humans
-Made function that returns the percentage of human faces found in both the dog and human face datasets respectively, both sizes were of size 100.
+Made function that returns the percentage of human faces found in both the dog and human face datasets respectively, both datasets were of size 100.
 
 ## Detect Dogs
 Using a pre-trained VGG16 model to find the predicted label for an image:
 ```dog_detector``` function returns ```True``` if a dog is detected ```False``` otherwise. 
 
 ## Classify Dog Breeds with custom CNN
-The custom CNN architecture of trained model needed to at least achieve 10% accuracy on the test set. This is where the need for Transfer Learning is required since the custom implementation needed a long time to achieve a score slightly above 10%.
+The custom CNN architecture of trained model needed to at least achieve 10% accuracy on the test set. This is where the need for Transfer Learning is evident since the custom implementation required alot of time to achieve a score above 10%.
 
 ## Acknowledgements
 Thank Udacity for the Nanodegree Couse and for providing the Data for the Image Classifier
