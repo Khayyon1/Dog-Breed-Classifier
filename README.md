@@ -21,30 +21,15 @@ Before the image can be passed into the CNN model, we need a function that can c
 - col: col of pixel
 - channel: referring to the color channel (3 for RGB and 1 for grayscale)
 
-```python
-from keras.preprocessing import image
-def path_to_tensor(img_path: str):
-    img = image.load_img(img_path, target_size=(224, 224))
-    x = image.img_to_array(img)
-    return np.expand_dims(x, axis=0)
-def paths_to_tensor(img_path_list: list):
-    list_of_tensors = [path_to_tensor(img_path) \
-                       for img_path in img_paths]
-    return np.vstack(list_of_tensors)
-```
+![data](data_preprocessing.png)
 
 Models tend to do well with variables between 0 - 1, so it important to normalize the image tensor data to ensure that the values are managable for the model. 
 
-```python
-normalized_img = path_to_tensor(image_path).as_type('float32') / 255
-```
+![data](normalize_images.png)
 
 It is also helpful to transform the dog breed labels into categorical data. But since we are given the 133 breeds that we want to classify this is easy
 
-``` python
-from keras.utils import np_utils
-cat_labels = np_utils.to_categorical(np.array(labels), 133)
-```
+![data](one_hot.png)
 
 This gives us a One-hot encoded version of the labels as an input vector. For example if all of our breeds were German Shepherd, Dalmatian and Shih Tzu then an output would look like this [1, 0, 0] this means the output was a German Shepherd according to the model.
 
@@ -54,54 +39,16 @@ This is very easy due to Keras providing the implementations of the CNN Layers. 
 - input_shape = (244, 244, 3): RGB images resized to 244 x 244
 - n_classes = 133: it is the number of dog breeds
 
-```python
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, GlobalAveragePooling2D, Conv2D, MaxPool2D
-args_conv2d = {'strides': 3,
-               'kernel_size': 3,
-               'activation': 'relu',
-               'padding': 'same',
-               }
-args_maxpool = {'pool_size': 3}
-n_of_classes = 133
-input_shape = (244, 244, 3)
-cnn = Sequential()
-cnn.add(Conv2D(**args_conv2d, input_shape=input_shape, name='Input', cnnters=128))
-cnn.add(MaxPool2D(**args_maxpool))
-cnn.add(Conv2D(**args_conv2d, filters=256))
-cnn.add(MaxPool2D(**args_maxpool))
-cnn.add(GlobalAveragePooling2D())
-cnn.add(Dense(256, activation='relu'))
-cnn.add(Dropout(.2))
-cnn.add(Dense(n_of_classes, activation='softmax'))
-cnn.compile(metrics=['accuracy'], loss='categorical_crossentropy', optimizer='rmsprop')
-```
+![data](keras_model.png)
+
 After creating the CNN model, it time to train it. Since training can be very time-intensive, it's a good idea to save the model and it's progress as it trains. So using the ModelCheckpoint we can store the weights of the best models as it trains. This allows us to load in the model at a later point without training. This is great because it allows us to re-use our model in other projects as well.
 
-```python
-from keras.callbacks import ModelCheckpoint
-args_model_training = {'epochs': 5,
-                       'batch_size': 20,
-                       'verbose': 1,
-                       }
-checkpointer = ModelCheckpoint(filepath=model_weight_file,
-                               verbose=1, save_best_only=True)
-cnn.fit(training_data, training_target,
-        validation_data=(validation_data, validation_target),
-        callbacks=[checkpointer], **args_model_training,
-        )
-```
+![data](model_checkpoint.png)
 
 
 After training we need to see the model's accuracy on the test dataset as a indicator of the model's likely performance on new data. 
 
-```python
-n = len(y_test) #  number of test samples
-probabilities = cnn.predict(test_data)
-predictions = [np.argmax(x) for x in probl]
-test_labels = [np.argmax(y) for y in y_test]
-accuracy = (np.array(predictions) == np.array(test_labels)) / n
-```
+![data](model_impl_result.png)
 
 ### Results: Not looking good
 With the current Network in place, the models was able to go above 10% but it is completely unfit for any application at the moment.
@@ -115,19 +62,29 @@ Basically by utilizing an existing network possibly trained for another task to 
 
 Lucky for us, Keras has come to the rescue yet again. It has many of the trained networks made by professional ML Engineers that participate in some of the biggest ML competitions. Below is all we need to do to import one of these computational behemoths
 
-```python
-from keras.applications.resnet50 import ResNet50, preprocess_input
-resnet = ResNet50(weights='imagenet', include_top=False)
-```
+![](simple_model.png)
 
+- Since we are leveraging a pre-trianed model, all we have to do is load it
+- compute the bottleneck features for training images which is provided by Udacity
+- Then we build and train the network as shown above and use the bottleneck features and label of the train set as the input for the model. (We get the labels by having the new model predict them)
 
+![](VGG-19_model_architecture)
 
+The network is made with a small architecture and we repeat the training process. Similar to the custom network, we need to set the input shape
+
+![](simple_model.png)
+
+Thus we have successfully leveraged an existing model to speed up training and increase model accuracy
+
+### Results
+Using the VGG-19 network with the provided bottleneck features from Udacity, the new model had an accuracy of 66% in 20 epochs. This is staggering when compared to the 13% from our custom model. 
 
 ## Summary
 Building a specialized neural net to solve dog breed classificaiton was done with relative ease and little data through the use of transfer learning.
 
-This project could be expanded by trying to move it to another project or web application
+- Try to tweak the hyperparameters to increase accuracy and see if 85% - 95% accuracy can be achieved
 
+- Try to move the project to a web app or a mobile device 
 
 # Github Repo Contents
 
